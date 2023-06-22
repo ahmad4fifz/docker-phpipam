@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:latest
+    container_name: phpipam-web
+    ports:
+      - "80:80"
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+      - IPAM_DATABASE_HOST=phpipam-db
+      - IPAM_DATABASE_PASS=IpamSecure123!
+      - IPAM_DATABASE_WEBHOST=%
+    restart: unless-stopped
+    volumes:
+      - phpipam-logo:/phpipam/css/images/logo
+      - phpipam-ca:/usr/local/share/ca-certificates:ro
+    depends_on:
+      - phpipam-db
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:latest
+    container_name: phpipam-cron
+    environment:
+      - TZ=Asia/Kuala_Lumpur
+      - IPAM_DATABASE_HOST=phpipam-db
+      - IPAM_DATABASE_PASS=IpamSecure123!
+      - SCAN_INTERVAL=1h
+    restart: unless-stopped
+    volumes:
+      - phpipam-ca:/usr/local/share/ca-certificates:ro
+    depends_on:
+      - phpipam-db
+
+  phpipam-db:
+    image: mariadb:latest
+    container_name: phpipam-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=IpamSecure123!
+    restart: unless-stopped
+    volumes:
+      - phpipam-db:/var/lib/mysql
+
+volumes:
+  phpipam-db:
+  phpipam-logo:
+  phpipam-ca:
